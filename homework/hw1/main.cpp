@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/Eigen>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 constexpr double MY_PI = 3.1415926;
 
@@ -26,6 +27,13 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
+    float rotation_radian = rotation_angle * MY_PI / 180;
+    Eigen::Matrix4f rotateZ;
+    rotateZ <<  cos(rotation_radian),   -sin(rotation_radian),  0,  0,
+                sin(rotation_radian),   cos(rotation_radian),   0,  0,
+                0,                      0,                      1,  0,
+                0,                      0,                      0,  1;
+    model = model * rotateZ;
 
     return model;
 }
@@ -40,6 +48,13 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+    double d = 1 / tan((eye_fov/2) * MY_PI / 180);
+    double A = -(zFar + zNear) / (zFar - zNear);
+    double B = -2 * zFar * zNear / (zFar - zNear);
+    projection <<   d / aspect_ratio,   0,  0,  0,
+                    0,                  d,  0,  0,
+                    0,                  0,  A,  B,
+                    0,                  0,  -1,  0;                 
 
     return projection;
 }
@@ -106,11 +121,11 @@ int main(int argc, const char** argv)
 
         std::cout << "frame count: " << frame_count++ << '\n';
 
-        if (key == 'a') {
-            angle += 10;
+        if (key == 'a' or key == 'A') {
+            angle += 20;
         }
-        else if (key == 'd') {
-            angle -= 10;
+        else if (key == 'd' or key == 'D') {
+            angle -= 20;
         }
     }
 
