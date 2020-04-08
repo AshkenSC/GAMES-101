@@ -1,5 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <algorithm>
+#include <cmath>
 
 #include "global.hpp"
 #include "rasterizer.hpp"
@@ -7,6 +9,7 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "OBJ_Loader.h"
+using namespace std;
 
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
@@ -49,8 +52,20 @@ Eigen::Matrix4f get_model_matrix(float angle)
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
-    // TODO: Use the same projection matrix from the previous assignments
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
+    // TODO: Implement this function
+    // Create the projection matrix for the given parameters.
+    // Then return it.
+    double d = 1 / tan((eye_fov/2) * MY_PI / 180);
+    double A = -(zFar + zNear) / (zFar - zNear);
+    double B = -2 * zFar * zNear / (zFar - zNear);
+    projection <<   d / aspect_ratio,   0,  0,  0,
+                    0,                  d,  0,  0,
+                    0,                  0,  A,  B,
+                    0,                  0,  -1,  0;                 
+
+    return projection;
 }
 
 Eigen::Vector3f vertex_shader(const vertex_shader_payload& payload)
@@ -221,8 +236,9 @@ Eigen::Vector3f displacement_fragment_shader(const fragment_shader_payload& payl
     // dU = kh * kn * (h(u+1/w,v)-h(u,v))
     // dV = kh * kn * (h(u,v+1/h)-h(u,v))
     // Vector ln = (-dU, -dV, 1)
-    // Position p = p + kn * n * h(u,v)
-    // Normal n = normalize(TBN * ln)
+    // Position p = p + kh * n * h(u,v)
+    // Normal n = TBN * ln
+
 
 
     Eigen::Vector3f result_color = {0, 0, 0};
@@ -270,7 +286,8 @@ Eigen::Vector3f bump_fragment_shader(const fragment_shader_payload& payload)
     // dU = kh * kn * (h(u+1/w,v)-h(u,v))
     // dV = kh * kn * (h(u,v+1/h)-h(u,v))
     // Vector ln = (-dU, -dV, 1)
-    // Normal n = normalize(TBN * ln)
+    // Normal nd = TBN * ln
+
 
 
     Eigen::Vector3f result_color = {0, 0, 0};
